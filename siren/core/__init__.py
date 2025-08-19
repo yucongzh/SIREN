@@ -1,0 +1,3 @@
+from .memory_bank.base_memory_bank import BaseMemoryBank
+from .memory_bank.dcase_memory_bank import MemoryBank as DCASEMemoryBank
+from .memory_bank.classification_memory_bank import ClassificationMemoryBank
