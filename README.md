@@ -251,20 +251,72 @@ Overall performance summary (DCASE anomaly detection + Fault classification):
 
 ## 📁 Dataset Structure
 
-Organize your datasets as follows (examples):
+Organize DCASE datasets by year as follows. Each year requires a label CSV placed under the `evaluation/` directory.
 
+### DCASE 2020 (Task 2)
+```text
+{dataset_root}/dcase2020_t2/
+├── development/
+│   └── {fan,pump,slider,ToyCar,ToyConveyor,valve}/
+│       ├── train/normal/*.wav
+│       └── test/{normal,anomaly}_id_XX_*.wav
+└── evaluation/
+    ├── {fan,pump,slider,ToyCar,ToyConveyor,valve}/test/id_XX_*.wav
+    └── eval_data_list_2020_converted.csv   # test_filename,reference_filename,label
 ```
-data/machine_data/
-├── dcase2020_t2/
-│   ├── development/
-│   │   ├── fan/
-│   │   │   ├── train/
-│   │   │   └── test/
-│   │   └── pump/
-│   └── evaluation/
-├── dcase2021_t2/
-└── ...
+
+### DCASE 2021 (Task 2)
+```text
+{dataset_root}/dcase2021_t2/
+├── development/
+│   └── {fan,pump,slider,gearbox,ToyCar,ToyTrain,valve}/
+│       └── section_{XX}_{source|target}_test_{anomaly|normal}_*.wav
+└── evaluation/
+    ├── {fan,pump,slider,gearbox,ToyCar,ToyTrain,valve}/section_{XX}_*.wav
+    └── eval_data_list_2021_converted.csv
 ```
+
+### DCASE 2022 (Task 2)
+```text
+{dataset_root}/dcase2022_t2/
+├── development/{machine}/section_{XX}_{source|target}_test_{anomaly|normal}_{####}_{cond}.wav
+└── evaluation/
+    ├── {machine}/section_{XX}_*.wav
+    └── eval_data_list_2022_converted.csv
+```
+
+### DCASE 2023 (Task 2)
+```text
+{dataset_root}/dcase2023_t2/
+├── development/{machine}/section_{XX}_{source|target}_test_{anomaly|normal}_{####}_{cond}.wav
+└── evaluation/
+    ├── {machine}/*_eval_*.wav
+    └── eval_data_list_2023_converted.csv
+```
+
+### DCASE 2024 (Task 2)
+```text
+{dataset_root}/dcase2024_t2/
+├── development/{machine}/...
+└── evaluation/
+    ├── {machine}/*_eval_*.wav
+    └── eval_data_list_2024_converted.csv
+```
+
+### DCASE 2025 (Task 2)
+```text
+{dataset_root}/dcase2025_t2/
+├── development/{machine}/...
+└── evaluation/
+    ├── {machine}/*_eval_*.wav
+    └── eval_data_list_2025_converted.csv
+```
+
+### Evaluation Label Files
+- Filename: `eval_data_list_YYYY_converted.csv`
+- Location: place under the corresponding year's `evaluation/` directory
+- Columns: `test_filename,reference_filename,label` (label in {0,1})
+ - Convenience: copies for 2020–2025 are also included in this toolkit at `siren/supplements/eval_lists/`
 
 MAFAULDA (example)
 
