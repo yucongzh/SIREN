@@ -465,36 +465,28 @@ config = {
 ## 📚 Documentation
 
 - [Examples](examples/)
-- [API Reference](#-api-reference)
 - [Quick Start](#-quick-start)
 
-## 🧪 Testing
-
-```bash
-# Run tests
-pytest tests/ -v
-
-# Run with coverage
-pytest tests/ --cov=siren --cov-report=html
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+ 
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
+We borrow some codes from the officials from  DCASE Task 2 challenges
+- [DCASE 2020 Task 2 Evaluator](https://github.com/y-kawagu/dcase2020_task2_evaluator)
+- [DCASE 2021 Task 2 Evaluator](https://github.com/y-kawagu/dcase2021_task2_evaluator)
+- [DCASE 2023 Task 2 Evaluator](https://github.com/nttcslab/dcase2023_task2_evaluator/)
+- [DCASE 2024 Task 2 Evaluator](https://github.com/nttcslab/dcase2024_task2_evaluator)
+- [DCASE 2025 Task 2 Evaluator](https://github.com/nttcslab/dcase2025_task2_evaluator)
 
-- DCASE Challenge organizers for the datasets
-- PyTorch team for the deep learning framework
-- The open-source community for inspiration
+## 📚 Dataset References
+
+- DCASE Challenge Task 2 (2020–2025): see the official challenge pages at [dcase.community](https://dcase.community/challenge)
+- CWRU Bearing Dataset: [Case Western Reserve University Bearing Data Center](https://engineering.case.edu/bearingdatacenter)
+- [MAFAULDA](http://www02.smt.ufrj.br/~offshore/mfs/page_01.html) Bearing Fault Dataset: official dataset page/publication
+- IDMT-ISA Electric Engine [(IIEE)](https://www.idmt.fraunhofer.de/en/publications/datasets/isa-electric-engine.html) and Compressed Air [(IICA)](https://www.idmt.fraunhofer.de/en/publications/datasets/isa-compressed-air.html) Datasets.
 
 ## 📞 Support
 
