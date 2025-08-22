@@ -48,7 +48,6 @@ SIREN provides comprehensive benchmarking capabilities across multiple domains:
 - **FISHER**: Frequency-aware self-supervised learning
 - **BEATs**: Bootstrap Audio Representation Learning
 - **Dasheng**: Large-scale audio foundation models
-- **EAT**: Efficient Audio Transformer
 - **Traditional**: Mel-spectrogram and statistical features
 
 ## 📦 Installation
@@ -90,8 +89,6 @@ pip install librosa soundfile
 # Optional: Transformers for CED models
 pip install transformers
 
-# Optional: Fairseq for EAT models
-pip install fairseq
 ```
 
 ## 🎯 Quick Start
@@ -150,7 +147,7 @@ python evaluate_dcase.py --extractor_path examples/melspec_extractor.py --dcase_
 # Evaluate all years sequentially
 python evaluate_dcase.py --extractor_path examples/melspec_extractor.py --dcase_year all
 
-# Evaluate all years with multiprocessing
+# Evaluate all years without multiprocessing
 python evaluate_dcase.py --extractor_path examples/melspec_extractor.py --dcase_year all --no_multiprocessing
 ```
 
