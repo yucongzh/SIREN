@@ -1,18 +1,23 @@
 """
-ECHO Feature Extractor - Example Implementation
+ECHO Feature Extractor - Example Implementation for SIREN Framework
 
 Author: Yucong Zhang
 Email: yucong0428@outlook.com
 
-This is a simplified example showing how to wrap your own model 
-for use with the siren evaluation framework.
+This is an example showing how to wrap the ECHO model 
+for use with the SIREN evaluation framework.
 
-Key points for users creating their own extractors:
-1. Inherit from BaseFeatureExtractor
-2. Implement _extract_single_channel_features() method (NOT extract_features_from_signal)
+Key points for users:
+1. Inherit from BandSplitFeatureExtractor
+2. Implement _extract_single_channel_features() method
 3. Implement _get_single_channel_feature_dim() method
 4. Set expected_channels for multi-channel datasets
 5. Multi-channel processing is handled automatically by the base class
+
+Model: ECHO-Small (21.5M parameters)
+- Repository: https://huggingface.co/yucongzh/echo-small-0824
+- Paper: https://arxiv.org/abs/2508.14689
+- Features: Utterance-level (2688) and Segment-level (T, 2688) representations
 """
 
 import torch
@@ -23,10 +28,20 @@ import sys
 
 from siren.core.base_extractor import BandSplitFeatureExtractor
 
-# Add your model path here - replace with your actual AudioMAE implementation path
-# Example: sys.path.append("/path/to/your/audioMAE/implementation/")
-sys.path.append("/path/to/your/ECHO/implementation/")
-from ECHO import AudioMAEWithBand
+# Add your model path here - replace with your actual ECHO implementation path
+# Option 1: Download from Hugging Face (recommended)
+from huggingface_hub import snapshot_download
+model_path = snapshot_download(
+    repo_id="yucongzh/echo-small-0824",
+    local_dir="./echo-small",
+    local_dir_use_symlinks=False
+)
+sys.path.append(model_path)
+
+# Option 2: Use local path if you have cloned the repository
+# sys.path.append("/path/to/your/ECHO/implementation/")
+
+from audioMAE_band_upgrade import AudioMAEWithBand
 
 class FeatureExtractor(BandSplitFeatureExtractor):
     """ECHO feature extractor - Example implementation for users."""
@@ -45,12 +60,19 @@ class FeatureExtractor(BandSplitFeatureExtractor):
         self.norm_std = 5.223174
         self.band_width = 32
         
-        # Load your model here
-        model_path = "/path/to/your/ECHO/checkpoint.pth"
-        if not os.path.exists(model_path):
-            raise FileNotFoundError("ECHO model not found. Please download the checkpoint file")
+        # Load model weights from safetensors file
+        weights_path = os.path.join(model_path, "model.safetensors")
+        if not os.path.exists(weights_path):
+            raise FileNotFoundError("ECHO model weights not found. Please check the downloaded files")
         
-        checkpoint = torch.load(model_path, map_location=self.device)
+        # Load weights using safetensors
+        try:
+            from safetensors.torch import load_file
+            state_dict = load_file(weights_path)
+            print("✅ Using safetensors to load weights")
+        except ImportError:
+            print("⚠️ safetensors not available, using torch.load")
+            state_dict = torch.load(weights_path, map_location=self.device)
         
         # Create model with your configuration
         model_cfg = {
@@ -59,7 +81,7 @@ class FeatureExtractor(BandSplitFeatureExtractor):
             "in_chans": 1,
             "embed_dim": 384,
             "encoder_depth": 12,
-            "num_heads": 12,
+            "num_heads": 6,
             "mlp_ratio": 4.0,
             "norm_layer": lambda x: torch.nn.LayerNorm(x, eps=1e-6),
             "fix_pos_emb": True,
@@ -71,15 +93,12 @@ class FeatureExtractor(BandSplitFeatureExtractor):
         self.model = AudioMAEWithBand(**model_cfg)
         
         # Load weights
-        if 'encoder' in checkpoint:
-            self.model.load_state_dict(checkpoint['encoder'])
-        else:
-            self.model.load_state_dict(checkpoint)
+        self.model.load_state_dict(state_dict, strict=False)
         
         self.model = self.model.to(self.device)
         self.model.eval()
         
-        print(f"ECHO model loaded from {model_path}")
+        print(f"ECHO model loaded from {weights_path}")
         print(f"Running on device: {self.device}")
     
     def _calculate_freq_bins(self, sample_rate: int) -> int:
@@ -128,15 +147,26 @@ class FeatureExtractor(BandSplitFeatureExtractor):
             input_specs.append(spec[..., -self.max_length:])
         
         # Step 4: Extract features using your model
-        features = []
-        for segment_spec in input_specs:
-            with torch.no_grad():
-                feature = self.model.extract_features(segment_spec.to(self.device), sample_rate).cpu()
-                features.append(feature)
+        utterance_features = []
+        segment_features = []
         
-        # Step 5: Aggregate features (mean pooling in this example)
-        features = torch.stack(features, dim=0).mean(dim=0)
-        return features.cpu()
+        for segment_spec in input_specs:
+            with torch.inference_mode():
+                # Extract both utterance-level and segment-level features
+                utt_feat, seg_feat = self.model.extract_features(segment_spec.to(self.device), sample_rate)
+                utterance_features.append(utt_feat.cpu())
+                segment_features.append(seg_feat.cpu())
+        
+        # Step 5: Aggregate features
+        # For utterance-level: mean pooling across segments
+        utterance_features = torch.stack(utterance_features, dim=0).mean(dim=0)
+        
+        # For segment-level: concatenate all segments
+        segment_features = torch.vstack(segment_features)
+        
+        # Return utterance-level features for compatibility with SIREN framework
+        # You can modify this to return segment-level features if needed
+        return utterance_features.cpu()
     
 
 
@@ -146,4 +176,8 @@ if __name__ == "__main__":
     extractor = FeatureExtractor()
     print(f"Feature dimension: {extractor.feature_dim}")
     print("Extractor ready for evaluation!")
+
+# Note: If you need segment-level features instead of utterance-level features,
+# you can modify the _extract_single_channel_features method to return segment_features
+# or create a separate method to access both feature types.
 
