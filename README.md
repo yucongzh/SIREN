@@ -79,6 +79,16 @@ pip install -e .
 
 ### Dependencies
 
+#### Quick Install (All Features)
+```bash
+# Install all dependencies including optional features
+pip install -r requirements.txt
+
+# Or install via setup.py (includes all dependencies)
+pip install -e .
+```
+
+#### Manual Install
 ```bash
 # Core dependencies
 pip install torch torchaudio numpy scipy scikit-learn pandas matplotlib seaborn
@@ -89,6 +99,8 @@ pip install librosa soundfile
 # Optional: Transformers for CED models
 pip install transformers
 
+# Optional: Additional libraries for advanced features
+pip install safetensors einops huggingface_hub
 ```
 
 ## 🎯 Quick Start

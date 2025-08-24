@@ -26,6 +26,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "torch>=1.8.0",
+        "torchaudio>=0.9.0",
         "numpy>=1.19.0",
         "scikit-learn>=0.24.0",
         "scipy>=1.7.0",
@@ -33,6 +34,14 @@ setup(
         "tqdm>=4.60.0",
         "pyyaml>=5.4.0",
         "thop>=0.1.1",
+        "librosa>=0.9.0",
+        "matplotlib>=3.3.0",
+        "seaborn>=0.11.0",
+        "transformers>=4.20.0",
+        "safetensors>=0.3.0",
+        "einops>=0.6.0",
+        "huggingface_hub>=0.10.0",
+        "soundfile>=0.10.0",
     ],
     extras_require={
         "dev": [

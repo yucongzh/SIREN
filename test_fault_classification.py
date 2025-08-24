@@ -18,7 +18,6 @@ from siren import FaultClassificationTester
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-
 def main(dataset_root: str, extractor_name: str = 'simple_feature_extractor', 
          use_kfold: bool = True, n_splits: int = 5, dataset_type: str = 'mafaulda',
          use_loocv: bool = False,
