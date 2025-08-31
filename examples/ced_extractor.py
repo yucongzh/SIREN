@@ -1,5 +1,8 @@
 """
 CED Feature Extractor - Example Implementation
+CED: Consistent Ensemble Distillation for Audio Tagging
+Authors: Heinrich Dinkel, Yongqing Wang, Zhiyong Yan, Junbo Zhang, Yujun Wang
+Paper link: https://arxiv.org/pdf/2308.11957
 
 Author: Yucong Zhang
 Email: yucong0428@outlook.com

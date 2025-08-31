@@ -1,5 +1,8 @@
 """
 ECHO Feature Extractor - Example Implementation for SIREN Framework
+ECHO: Frequency-aware Hierarchical Encoding for Variable-length Signal
+Authors: Yucong Zhang, Juan Liu, Ming Li
+Paper link: https://arxiv.org/abs/2508.14689
 
 Author: Yucong Zhang
 Email: yucong0428@outlook.com
@@ -16,7 +19,6 @@ Key points for users:
 
 Model: ECHO-Small (21.5M parameters)
 - Repository: https://huggingface.co/yucongzh/echo-small-0824
-- Paper: https://arxiv.org/abs/2508.14689
 - Features: Utterance-level (2688) and Segment-level (T, 2688) representations
 """
 

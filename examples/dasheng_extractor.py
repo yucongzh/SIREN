@@ -1,5 +1,8 @@
 """
 Dasheng Feature Extractor - Example Implementation
+Scaling up masked audio encoder learning for general audio classification
+Authors: Heinrich Dinkel, Zhiyong Yan, Yongqing Wang, Junbo Zhang, Yujun Wang, Bin Wang
+Paper link: https://arxiv.org/pdf/2406.06992
 
 Author: Yucong Zhang
 Email: yucong0428@outlook.com

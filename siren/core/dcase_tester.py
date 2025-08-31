@@ -1498,18 +1498,42 @@ class DCASETester(BaseTester):
                     std_features.append(t)
                 features_tensor = torch.stack(std_features)
                 
-                # Group features by domain/section
-                domain_groups = {}
-                for i, file_path in enumerate(train_files):
-                    domain_or_section = self._extract_domain_or_section(file_path, config['dataset_year'])
-                    if domain_or_section not in domain_groups:
-                        domain_groups[domain_or_section] = []
-                    domain_groups[domain_or_section].append(i)
-                
-                # Add features to memory bank by domain/section
-                for domain_or_section, indices in domain_groups.items():
-                    domain_features = features_tensor[indices]
-                    memory_bank.add_features(domain_or_section, domain_features)
+                # Group features by section and domain (source/target) for DCASE 2021+
+                if config['dataset_year'] == 2020:
+                    # Original behavior for 2020 (no domain_type required)
+                    domain_groups = {}
+                    for i, file_path in enumerate(train_files):
+                        domain_or_section = self._extract_domain_or_section(file_path, config['dataset_year'])
+                        if domain_or_section not in domain_groups:
+                            domain_groups[domain_or_section] = []
+                        domain_groups[domain_or_section].append(i)
+                    for domain_or_section, indices in domain_groups.items():
+                        domain_features = features_tensor[indices]
+                        memory_bank.add_features(domain_or_section, domain_features)
+                else:
+                    # DCASE 2021-2025: need section + domain_type ('source'/'target')
+                    import re
+                    section_groups = {}
+                    for i, file_path in enumerate(train_files):
+                        filename = os.path.basename(file_path)
+                        match = re.search(r'section_(\d+)', filename)
+                        if match:
+                            section_key = f"section_{match.group(1)}"
+                        else:
+                            section_key = 'default'
+                        domain_type = 'source' if '_source_' in filename else ('target' if '_target_' in filename else None)
+                        if section_key not in section_groups:
+                            section_groups[section_key] = {'source': [], 'target': []}
+                        if domain_type in ['source', 'target']:
+                            section_groups[section_key][domain_type].append(i)
+                    # Add to memory bank with explicit domain_type
+                    for section_key, idx_dict in section_groups.items():
+                        if idx_dict['source']:
+                            src_features = features_tensor[idx_dict['source']]
+                            memory_bank.add_features(section_key, src_features, 'source')
+                        if idx_dict['target']:
+                            tgt_features = features_tensor[idx_dict['target']]
+                            memory_bank.add_features(section_key, tgt_features, 'target')
                 
                 print(f"  Added {len(train_files)} {dataset_type} train files to memory bank for {machine_type}")
                 

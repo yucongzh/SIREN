@@ -1,30 +1,16 @@
 # SIREN
 
-**SIgnal Representation Evaluation for machiNes**
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-SIREN is a unified evaluation toolkit for general machine signals. It supports both DCASE-style anomaly detection (Task 2, 2020–2025) and fault diagnosis/classification across common rotating machinery datasets. Plug in your own feature extractor once, and evaluate across tasks and datasets with multiprocessing, GPU acceleration, and feature caching.
+SIREN (**SIgnal Representation Evaluation for machiNes**) is a unified evaluation toolkit for general machine signals. It supports both DCASE-style anomaly detection (Task 2, 2020–2025) and fault diagnosis/classification across common rotating machinery datasets. Plug in your own feature extractor once, and evaluate across tasks and datasets with multiprocessing, GPU acceleration, and feature caching.
 
-## 🚀 Features
-
-- ✅ **Multi-Task Support**
-  - DCASE anomaly detection: 2020–2025 Task 2 with official-like grouping and AUC/pAUC
-  - Fault diagnosis/classification: KNN-based pipeline with k-fold/LOOCV
-- ✅ **Custom Feature Extractors**: One simple interface for all tasks and formats
-- ✅ **Unified Signal I/O**: Load audio (.wav/.mp3/.flac/.m4a) and vibration (.csv/.mat) with a single API
-- ✅ **Multiprocessing**: Significant speedup for large-scale runs
-- ✅ **GPU Acceleration**: CUDA support for deep models
-- ✅ **Feature Caching**: Avoid redundant extraction across runs and folds
-- ✅ **Comprehensive Metrics**
-  - DCASE: AUC, pAUC with domain/section-aware grouping
-  - Classification: Accuracy, Precision, Recall, F1, per-class report, confusion matrix
-- ✅ **CLI Interface**: Ready-to-run scripts for both tasks
-- ✅ **Multi-GPU Support**: Parallel evaluation across GPUs (DCASE)
-- ✅ **Unified Memory Banks**
-  - DCASE 2021–2025: domain-aware structure (source/target)
-  - Classification: multi-channel friendly KNN memory bank
+## 🔥 Updates
+- [2025.08.29]
+    - Fix bugs when testing CWRU dataset. 
+    - Fix bugs when calling `--no_multiprocessing` in DCASE series evaluation. 
+    - Add EAT models in examples.
+    - Fix Dasheng example.
 
 ## 📊 Benchmark Content
 
@@ -42,13 +28,6 @@ SIREN provides comprehensive benchmarking capabilities across multiple domains:
 - **IIEE**: IDMT-ISA Electric Engine dataset with noise-robust evaluation
 - **IICA**: IDMT-ISA Compressed Air dataset
 
-### Supported Models
-- **ECHO**: Self-supervised audio representation learning
-- **CED**: Conformer-based audio classification models
-- **FISHER**: Frequency-aware self-supervised learning
-- **BEATs**: Bootstrap Audio Representation Learning
-- **Dasheng**: Large-scale audio foundation models
-- **Traditional**: Mel-spectrogram and statistical features
 
 ## 📦 Installation
 
@@ -61,46 +40,6 @@ cd siren
 
 # Install in development mode
 pip install -e .
-```
-
-### With Conda (Recommended for GPU)
-
-```bash
-# Create environment
-conda create -n siren python=3.8
-conda activate siren
-
-# Install PyTorch with CUDA
-conda install pytorch torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-
-# Install package
-pip install -e .
-```
-
-### Dependencies
-
-#### Quick Install (All Features)
-```bash
-# Install all dependencies including optional features
-pip install -r requirements.txt
-
-# Or install via setup.py (includes all dependencies)
-pip install -e .
-```
-
-#### Manual Install
-```bash
-# Core dependencies
-pip install torch torchaudio numpy scipy scikit-learn pandas matplotlib seaborn
-
-# Audio processing
-pip install librosa soundfile
-
-# Optional: Transformers for CED models
-pip install transformers
-
-# Optional: Additional libraries for advanced features
-pip install safetensors einops huggingface_hub
 ```
 
 ## 🎯 Quick Start
@@ -132,7 +71,7 @@ The base class handles:
 
 See working examples in `examples/`:
 - `echo_extractor.py`, `fisher_extractor.py`, `melspec_extractor.py`, `beats_extractor.py`
-- `ced_extractor.py`, `dasheng_extractor.py`
+- `ced_extractor.py`, `dasheng_extractor.py`, `eat_extractor.py`
 
 ### 2) DCASE Anomaly Detection
 
@@ -150,7 +89,7 @@ tester = DCASETester(
 tester.run_evaluation()
 ```
 
-CLI
+CLI (Recommended)
 
 ```bash
 # Evaluate one year
@@ -171,7 +110,7 @@ bash run_all_dcase.sh examples/melspec_extractor.py
 
 ### 3) Fault Diagnosis / Classification
 
-Python API (KNN-based evaluation with k-fold or LOOCV)
+Python API (KNN-based embedding evaluation with k-fold or LOOCV)
 
 ```python
 from siren import FaultClassificationTester
@@ -194,48 +133,42 @@ tester = FaultClassificationTester(config)
 results = tester.run_evaluation()
 ```
 
-CLI
+CLI (Recommended)
 
 ```bash
 # MAFAULDA example
 python test_fault_classification.py \
-  --dataset_root /path/to/MAFAULDA \
-  --extractor_name examples.melspec_extractor \
-  --dataset_type mafaulda \
-  --use_kfold --n_splits 5
+    --dataset_root /path/to/MAFAULDA \
+    --extractor_name ${your_extractor_name}_extractor \
+    --dataset_type mafaulda \
+    --loocv --per_channel_knn
 
 # CWRU example
 python test_fault_classification.py \
-  --dataset_root /path/to/CWRU \
-  --extractor_name examples.melspec_extractor \
-  --dataset_type cwru \
-  --use_kfold --n_splits 5
+    --dataset_root /path/to/CWRU_Bearing_Dataset/CWRU-dataset \
+    --extractor_name ${your_extractor_name}_extractor \
+    --dataset_type cwru \
+    --loocv
 
 # IIEE (IDMT-ISA Electric Engine) example
 python test_fault_classification.py \
-  --dataset_root /path/to/IDMT-ISA-Electric-Engine \
-  --extractor_name examples.melspec_extractor \
-  --dataset_type iiee \
-  --use_kfold --n_splits 5
-
-# IIEE external test (noise-robust task) with per-condition report
-python test_fault_classification.py \
-  --dataset_root /path/to/IDMT-ISA-Electric-Engine \
-  --extractor_name examples.melspec_extractor \
-  --dataset_type iiee \
-  --external_test --group_by_condition
+    --dataset_root /path/to/IDMT-ISA-Electric-Engine \
+    --extractor_name ${your_extractor_name}_extractor \
+    --dataset_type iiee \
+    --no_kfold \
+    --external_test --group_by_condition
 
 # IICA (IDMT-ISA Compressed Air) example
 python test_fault_classification.py \
-  --dataset_root /path/to/IDMT-ISA-Compressed-Air \
-  --extractor_name examples.melspec_extractor \
-  --dataset_type iica \
-  --use_kfold --n_splits 5
+    --dataset_root /path/to/IDMT-ISA-Compressed-Air \
+    --extractor_name ${your_extractor_name}_extractor \
+    --dataset_type iica \
+    --use_kfold --n_splits 5
 ```
 
 ### 4) Quick Evaluation Commands
 
-For comprehensive evaluation across all datasets and tasks, use the provided script:
+For comprehensive evaluation across all datasets and tasks, please use the provided script:
 
 ```bash
 # Set your extractor name
@@ -249,10 +182,10 @@ This script will automatically:
 1. Test DCASE series (2020-2025) sequentially
 2. Test MAFAULDA dataset with LOOCV
 3. Test CWRU dataset with LOOCV  
-4. Test IIEE dataset with external test evaluation
+4. Test IIEE dataset with official train-test split
 5. Test IICA dataset with k-fold cross-validation
 
-## 📊 Real Results
+## 📊 Results
 
 Overall performance summary (DCASE anomaly detection + Fault classification):
 
@@ -260,281 +193,47 @@ Overall performance summary (DCASE anomaly detection + Fault classification):
 
 ## 📁 Dataset Structure
 
-Organize DCASE datasets by year as follows. Each year requires a label CSV placed under the `evaluation/` directory.
+For detailed dataset organization instructions, please refer to [DATASET_STRUCTURE.md](DATASET_STRUCTURE.md).
 
-### DCASE 2020 (Task 2)
-```text
-{dataset_root}/dcase2020_t2/
-├── development/
-│   └── {fan,pump,slider,ToyCar,ToyConveyor,valve}/
-│       ├── train/normal/*.wav
-│       └── test/{normal,anomaly}_id_XX_*.wav
-└── evaluation/
-    ├── {fan,pump,slider,ToyCar,ToyConveyor,valve}/test/id_XX_*.wav
-    └── eval_data_list_2020_converted.csv   # test_filename,reference_filename,label
-```
+**Supported Datasets:**
+- **DCASE Challenge Series (2020-2025)**: Task 2 - Unsupervised Anomaly Detection
+- **MAFAULDA**: Multi-fault bearing dataset with 8-channel vibration data
+- **CWRU**: Case Western Reserve University bearing fault dataset  
+- **IIEE**: IDMT-ISA Electric Engine dataset with noise-robust evaluation
+- **IICA**: IDMT-ISA Compressed Air dataset
 
-### DCASE 2021 (Task 2)
-```text
-{dataset_root}/dcase2021_t2/
-├── development/
-│   └── {fan,pump,slider,gearbox,ToyCar,ToyTrain,valve}/
-│       └── section_{XX}_{source|target}_test_{anomaly|normal}_*.wav
-└── evaluation/
-    ├── {fan,pump,slider,gearbox,ToyCar,ToyTrain,valve}/section_{XX}_*.wav
-    └── eval_data_list_2021_converted.csv
-```
+Each dataset has specific directory structure requirements. The detailed setup guide covers:
+- Directory organization for each DCASE year
+- Fault diagnosis dataset structures
+- Evaluation label file formats
+- Audio format and sample rate specifications
 
-### DCASE 2022 (Task 2)
-```text
-{dataset_root}/dcase2022_t2/
-├── development/{machine}/section_{XX}_{source|target}_test_{anomaly|normal}_{####}_{cond}.wav
-└── evaluation/
-    ├── {machine}/section_{XX}_*.wav
-    └── eval_data_list_2022_converted.csv
-```
+## 🤝 Contributing
 
-### DCASE 2023 (Task 2)
-```text
-{dataset_root}/dcase2023_t2/
-├── development/{machine}/section_{XX}_{source|target}_test_{anomaly|normal}_{####}_{cond}.wav
-└── evaluation/
-    ├── {machine}/*_eval_*.wav
-    └── eval_data_list_2023_converted.csv
-```
+**🚧 This toolkit is currently under active development!** 
 
-### DCASE 2024 (Task 2)
-```text
-{dataset_root}/dcase2024_t2/
-├── development/{machine}/...
-└── evaluation/
-    ├── {machine}/*_eval_*.wav
-    └── eval_data_list_2024_converted.csv
-```
+We welcome contributions from the community to help make this toolkit more comprehensive and provide better benchmarks for machine signal anomaly detection/fault analysis. If you're interested in:
 
-### DCASE 2025 (Task 2)
-```text
-{dataset_root}/dcase2025_t2/
-├── development/{machine}/...
-└── evaluation/
-    ├── {machine}/*_eval_*.wav
-    └── eval_data_list_2025_converted.csv
-```
+- **Adding new feature extractors** (audio, vibration, or other signal types)
+- **Implementing new evaluation metrics** or datasets
+- **Improving performance** or adding new features
+- **Bug fixes** and documentation improvements
+- **Research collaborations** on machine signal representation learning
 
-### Evaluation Label Files
-- Filename: `eval_data_list_YYYY_converted.csv`
-- Location: place under the corresponding year's `evaluation/` directory
-- Columns: `test_filename,reference_filename,label` (label in {0,1})
- - Convenience: copies for 2020–2025 are also included in this toolkit at `siren/supplements/eval_lists/`
+Please feel free to:
+- 🐛 Report issues on [GitHub Issues](https://github.com/yucongzh/SIREN/issues)
+- 💡 Suggest new features or improvements
+- 🔧 Submit pull requests
+- 📧 Contact us directly at yucong0428@outlook.com
 
-MAFAULDA (example)
-
-```
-/path/to/MAFAULDA/
-├── horizontal-misalignment/
-│   ├── 0.5mm/
-│   ├── 1.0mm/
-│   ├── 1.5mm/
-│   └── 2.0mm/
-├── vertical-misalignment/
-│   ├── 0.51mm/
-│   ├── 0.63mm/
-│   ├── 1.27mm/
-│   ├── 1.40mm/
-│   ├── 1.78mm/
-│   └── 1.90mm/
-├── imbalance/
-│   ├── 6g/
-│   ├── 10g/
-│   ├── 15g/
-│   ├── 20g/
-│   ├── 25g/
-│   ├── 30g/
-│   └── 35g/
-├── overhang/
-│   ├── ball_fault/
-│   ├── cage_fault/
-│   └── outer_race/
-├── underhang/
-│   ├── ball_fault/
-│   ├── cage_fault/
-│   └── outer_race/
-└── normal/
-```
-
-CWRU (example)
-
-```
-/path/to/CWRU/
-├── 12k_Drive_End_Bearing_Fault_Data/
-│   ├── B/
-│   │   ├── 007/
-│   │   ├── 014/
-│   │   ├── 021/
-│   │   └── 028/
-│   ├── IR/
-│   │   ├── 007/
-│   │   ├── 014/
-│   │   ├── 021/
-│   │   └── 028/
-│   └── OR/
-│       ├── 007/
-│       ├── 014/
-│       └── 021/
-├── 12k_Fan_End_Bearing_Fault_Data/
-│   ├── B/
-│   │   ├── 007/
-│   │   ├── 014/
-│   │   └── 021/
-│   ├── IR/
-│   │   ├── 007/
-│   │   ├── 014/
-│   │   └── 021/
-│   └── OR/
-│       ├── 007/
-│       ├── 014/
-│       └── 021/
-├── 48k_Drive_End_Bearing_Fault_Data/
-│   ├── B/
-│   │   ├── 007/
-│   │   ├── 014/
-│   │   └── 021/
-│   ├── IR/
-│   │   ├── 007/
-│   │   ├── 014/
-│   │   └── 021/
-│   └── OR/
-│       ├── 007/
-│       ├── 014/
-│       └── 021/
-└── Normal/
-```
-
-IIEE (IDMT-ISA Electric Engine) (example)
-
-```
-/path/to/IDMT-ISA-Electric-Engine/
-├── train/
-│   ├── engine1_good/pure.wav
-│   ├── engine2_broken/pure.wav
-│   └── engine3_heavyload/pure.wav
-├── train_cut/
-│   ├── engine1_good/pure_*.wav   # 3-second clips, 44.1 kHz, mono, 16-bit
-│   ├── engine2_broken/pure_*.wav
-│   └── engine3_heavyload/pure_*.wav
-└── test/
-    ├── engine1_good/{talking_*.wav, atmo_*.wav, whitenoise_low.wav, stresstest.wav}
-    ├── engine2_broken/{...}
-    └── engine3_heavyload/{...}
-```
-
-IICA (IDMT-ISA Compressed Air) (example)
-
-```
-/path/to/IDMT-ISA-Compressed-Air/
-└── raw/
-    ├── tubeleak/{hydr, hydr_low, lab, work, work_low}/{1,2,3}/*.wav  # 48 kHz, mono, 24-bit
-    └── ventleak/{hydr, hydr_low, lab, work, work_low}/{1,2,3}/*.wav
-```
-
-## 📈 Performance
-
-- **6x speedup** with multiprocessing
-- **GPU acceleration** for deep learning models
-- **Feature caching** for faster re-evaluation
-- **Memory efficient** processing
-
-## 🔧 Configuration
-
-### Memory Bank Settings
-
-```python
-config = {
-    'memory_bank': {
-        'similarity_type': 'cosine',  # 'cosine' or 'euclidean'
-        'aggregation': 'max',         # 'max', 'mean', 'min', 'knn'
-        'k': 1,                       # For KNN aggregation
-        'domain_strategy': 'min',     # 'min', 'max', 'mean' (DCASE 2021-2025)
-        'enable_kmeans_optimization': False,  # Enable kmeans clustering
-        'kmeans_threshold': 100,      # Sample threshold for kmeans
-        'kmeans_n_clusters': 16       # Number of kmeans clusters
-    }
-}
-```
-
-### Multiprocessing Settings
-
-```python
-config = {
-    'multiprocessing': {
-        'enabled': True,
-        'num_processes': 6  # Number of parallel processes
-    }
-}
-```
-
-## 🔄 New Features (DCASE 2021-2025)
-
-### Unified Memory Bank Structure
-
-For DCASE 2021-2025, the memory bank uses a unified structure:
-
-```python
-memory_bank = {
-    'section_00': {
-        'source': features,  # Source domain features
-        'target': features   # Target domain features
-    },
-    'section_01': {
-        'source': features,
-        'target': features
-    },
-    ...
-}
-```
-
-### Domain-Aware Anomaly Scoring
-
-The framework now supports domain-aware anomaly scoring:
-
-1. **Separate Computation**: Source and target features are processed separately
-2. **Strategy Selection**: Choose how to combine scores ('min', 'max', 'mean')
-3. **KMeans Optimization**: Optional clustering for large feature sets
-
-### Configuration Examples
-
-```python
-# Basic configuration (default)
-config = {
-    'memory_bank': {
-        'domain_strategy': 'min',     # Use minimum of source/target scores
-        'enable_kmeans_optimization': False
-    }
-}
-
-# Advanced configuration with kmeans optimization
-config = {
-    'memory_bank': {
-        'domain_strategy': 'mean',    # Use mean of source/target scores
-        'enable_kmeans_optimization': True,
-        'kmeans_threshold': 100,      # Enable for >100 samples
-        'kmeans_n_clusters': 16       # Number of clusters
-    }
-}
-```
-
-## 📚 Documentation
-
-- [Examples](examples/)
-- [Quick Start](#-quick-start)
+Together, we can build a more robust and comprehensive benchmark toolkit for the community!
 
  
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 We borrow some codes from the officials from  DCASE Task 2 challenges
 - [DCASE 2020 Task 2 Evaluator](https://github.com/y-kawagu/dcase2020_task2_evaluator)
 - [DCASE 2021 Task 2 Evaluator](https://github.com/y-kawagu/dcase2021_task2_evaluator)
@@ -542,18 +241,13 @@ We borrow some codes from the officials from  DCASE Task 2 challenges
 - [DCASE 2024 Task 2 Evaluator](https://github.com/nttcslab/dcase2024_task2_evaluator)
 - [DCASE 2025 Task 2 Evaluator](https://github.com/nttcslab/dcase2025_task2_evaluator)
 
-## 📚 Dataset References
+## References
 
 - DCASE Challenge Task 2 (2020–2025): see the official challenge pages at [dcase.community](https://dcase.community/challenge)
 - CWRU Bearing Dataset: [Case Western Reserve University Bearing Data Center](https://engineering.case.edu/bearingdatacenter)
 - [MAFAULDA](http://www02.smt.ufrj.br/~offshore/mfs/page_01.html) Bearing Fault Dataset: official dataset page/publication
 - IDMT-ISA Electric Engine [(IIEE)](https://www.idmt.fraunhofer.de/en/publications/datasets/isa-electric-engine.html) and Compressed Air [(IICA)](https://www.idmt.fraunhofer.de/en/publications/datasets/isa-compressed-air.html) Datasets.
 
-## 📞 Support
-
-- 📧 Email: yucong0428@outlook.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yucongzh/SIREN/issues)
-- 📖 Documentation: [Examples](examples/)
 
 ---
 

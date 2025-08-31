@@ -1,5 +1,8 @@
 """
 BEATs Feature Extractor - Example Implementation
+Beats: Audio pre-training with acoustic tokenizers
+Authors: Sanyuan Chen, Yu Wu, Chengyi Wang, Shujie Liu, Daniel Tompkins, Zhuo Chen, Wanxiang Che, Xiangzhan Yu, Furu Wei
+Paper link: https://arxiv.org/pdf/2212.09058
 
 Author: Yucong Zhang
 Email: yucong0428@outlook.com

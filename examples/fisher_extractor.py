@@ -1,5 +1,8 @@
 """
 FISHER Feature Extractor - Example Implementation
+FISHER: A Foundation Model for Multi-Modal Industrial Signal Comprehensive Representation
+Authors: Pingyi Fan, Anbai Jiang, Shuwei Zhang, Zhiqiang Lv, Bing Han, Xinhu Zheng, Wenrui Liang, Junjie Li, Wei-Qiang Zhang, Yanmin Qian, Xie Chen, Cheng Lu, Jia Liu
+Paper link: https://arxiv.org/pdf/2507.16696
 
 Author: Yucong Zhang
 Email: yucong0428@outlook.com
