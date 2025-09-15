@@ -223,6 +223,11 @@ class ClassificationMemoryBank(BaseMemoryBank):
         topk_dists_ch = np.empty((B, C, k), dtype=float)
         # 逐通道选择top-k，C<=16，循环可接受
         per_raw = dist if metric == 'euclidean' else (1.0 - sim)  # [B,N,C]
+        # 新增：LOOCV per-channel 对角屏蔽（仅方阵时）
+        if leave_one_out and per_raw.shape[0] == per_raw.shape[1]:
+            diag_idx = np.arange(per_raw.shape[0])
+            # 对每个通道将对角线置为无穷大
+            per_raw[diag_idx, diag_idx, :] = np.inf
         for c in range(C):
             per_c = per_raw[:, :, c]  # [B,N]
             idx_part = np.argpartition(per_c, kth=k-1, axis=1)[:, :k]
@@ -396,6 +401,12 @@ class ClassificationMemoryBank(BaseMemoryBank):
         topk_dists_ch = np.empty((chunk_size, C, k), dtype=float)
         
         per_raw = dist if metric == 'euclidean' else (1.0 - sim)
+        # 新增：LOOCV per-channel 对角屏蔽（仅方阵时）
+        if leave_one_out and per_raw.shape[0] == per_raw.shape[1]:
+            diag_idx = np.arange(per_raw.shape[0])
+            # 对每个通道将对角线置为无穷大
+            per_raw[diag_idx, diag_idx, :] = np.inf
+
         for c in range(C):
             per_c = per_raw[:, :, c]
             idx_part = np.argpartition(per_c, kth=k-1, axis=1)[:, :k]

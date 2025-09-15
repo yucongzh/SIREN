@@ -6,6 +6,9 @@
 SIREN (**SIgnal Representation Evaluation for machiNes**) is a unified evaluation toolkit for general machine signals. It supports both DCASE-style anomaly detection (Task 2, 2020–2025) and fault diagnosis/classification across common rotating machinery datasets. Plug in your own feature extractor once, and evaluate across tasks and datasets with multiprocessing, GPU acceleration, and feature caching.
 
 ## 🔥 Updates
+- [2025.09.15]
+    - Fix data leaking when testing MAFAULDA dataset with `per_channel_knn` activated.
+    - Update comparison table.
 - [2025.08.29]
     - Fix bugs when testing CWRU dataset. 
     - Fix bugs when calling `--no_multiprocessing` in DCASE series evaluation. 
